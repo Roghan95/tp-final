@@ -20,4 +20,14 @@ const loginUser = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+const logoutUser = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await userService.logout(email, password);
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { registerUser, loginUser, logoutUser };
