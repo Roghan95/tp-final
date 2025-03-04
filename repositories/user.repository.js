@@ -1,11 +1,16 @@
-const { User } = require("../models");
+const { models } = require("../../config/db");
+const User = models.User;
 
-const createUser = async (email, password) => {
-  return await User.create({ email, password });
+async function listAllUsers() {
+  const users = await User.findAll();
+  return users;
+}
+
+async function createUser(userData) {
+  return await User.create(userData);
+}
+
+module.exports = {
+  listAllUsers,
+  createUser,
 };
-
-const getUserByEmail = async (email) => {
-  return await User.findOne({ where: { email } });
-};
-
-module.exports = { createUser, getUserByEmail };

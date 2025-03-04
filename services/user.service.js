@@ -1,23 +1,19 @@
-const userRepo = require("../repositories/user.repository");
-const bcrypt = require("bcrypt");
+const userRepository = require("../repositories/user.repository");
 
-const register = async (email, password) => {
-  const user = await userRepo.createUser(email, password);
-  return user;
+async function listAllUsers() {
+  return await userRepository.listAllUsers();
+}
+
+async function signUp(userData) {
+  return await userRepository.createUser(userData);
+}
+
+async function signIn(email) {
+  return await userRepository.getUserByEmail(email);
+}
+
+module.exports = {
+  listAllUsers,
+  signUp,
+  signIn,
 };
-
-const login = async (email, password) => {
-  const user = await userRepo.getUserByEmail(email);
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  const isValidPassword = await bcrypt.compare(password, user.password);
-  if (!isValidPassword) {
-    throw new Error("Invalid password");
-  }
-
-  return user;
-};
-
-module.exports = { register, login };

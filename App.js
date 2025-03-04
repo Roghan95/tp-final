@@ -29,10 +29,10 @@ app.use(limiter);
 app.use(expressValidator());
 
 // Importer les routes
-const userRouter = require("./routers/user.router");
-app.use("/api/users", userRouter);
+const userRouter = require("../routers/user.router.js");
+app.use("/user", userRouter);
 
-// Middleware global de gestion des erreurs
+// Middleware global de gestion des erreursZ
 app.use((err, req, res, next) => {
   console.error("❌ Erreur serveur :", err);
   res.status(500).json({ message: "Erreur interne du serveur" });

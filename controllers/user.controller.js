@@ -1,33 +1,57 @@
 const userService = require("../services/user.service");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-const registerUser = async (req, res, next) => {
+async function listAllUsers(req, res, next) {
   try {
-    const { email, password } = req.body;
-    const user = await userService.register(email, password);
-    res.status(201).json(user);
+    const users = await userService.listAllUsers();
+    res.status(200).json(users);
   } catch (error) {
     next(error);
   }
-};
+}
 
-const loginUser = async (req, res, next) => {
+const signUp = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await userService.login(email, password);
-    res.status(200).json(user);
+    const hash = await bcrypt.hash(req.body.password, 10);
+    const user = await userService.signUp({ ...req.body, password: hash });
+
+    const token = jwt.sign({ id: user.id }, process.env.SECRET_KEY, {
+      expiresIn: "1h",
+    });
+
+    res.status(201).json({ user, token });
   } catch (error) {
-    next(error);
+    res.status(400).json({ error: error.message });
   }
 };
 
-const logoutUser = async (req, res, next) => {
+const signIn = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await userService.logout(email, password);
-    res.status(200).json(user);
+    const user = await userService.signIn(req.body.email);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const isValid = await bcrypt.compare(req.body.password, user.password);
+
+    if (!isValid) {
+      throw new Error("Invalid password");
+    }
+
+    const accessToken = jwt.sign({ sub: email, userId: user.id }, "secret", {
+      expiresIn: "10m",
+    });
+
+    res.status(200).json({ message: "User logged in" });
   } catch (error) {
-    next(error);
+    res.status(401).json({ message: "Logging failed", error });
   }
 };
 
-module.exports = { registerUser, loginUser, logoutUser };
+module.exports = {
+  listAllUsers,
+  signIn,
+  signUp,
+};
