@@ -1,30 +1,23 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
 const userController = require("../controllers/user.controller");
-const { body, validationResult } = require("express-validator");
+const auth = require("../middlewares/auth.middleware");
 
 /* GET users listing. */
 router.get("/", function (req, res, next) {
   res.send("respond with a resource");
 });
 
-// GET /users : List all users
-router.get("/users", userController.listAllUsers);
+// Afficher le profile de l'utilisateur
+router.get("/", auth, userController.getProfile);
 
-// POST /users : Create a new user
-router.post(
-  "/signUp",
-  [body("email").isEmail(), body("password").isLength({ min: 6 })],
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    res.status(201).json({ message: "Utilisateur valide" });
-  },
-  userController.signUp
-);
+// Afficher tout les users
+router.get("/", userController.listAllUsers);
 
-router.post("/refresh", refresh, userController.getRefreshToken);
+// Créer un nouveau user
+router.post("/signUp", userController.signUp);
+
+// Se connecter
+router.post("/signIn", userController.signIn);
 
 module.exports = router;
